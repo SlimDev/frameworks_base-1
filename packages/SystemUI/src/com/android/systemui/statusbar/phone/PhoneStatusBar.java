@@ -421,6 +421,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     // Candy logo
     private boolean mCandyLogo;
     private ImageView candyLogo;
+    private int mQsLayoutColumns;
 
     private int mNavigationBarWindowState = WINDOW_STATE_SHOWING;
 
@@ -598,6 +599,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_SHOW_TICKER),
                     false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.QS_LAYOUT_COLUMNS),
+                    false, this, UserHandle.USER_ALL);
             update();
         }
 
@@ -626,27 +630,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         Settings.System.STATUS_BAR_SHOW_TICKER,
                         0, UserHandle.USER_CURRENT) == 1;
                 initTickerView(); 
-           }
-
-           update();
+            }
+            update();
         }
 
-
-        void unobserve() {
+        public void update() {
             ContentResolver resolver = mContext.getContentResolver();
-            resolver.unregisterContentObserver(this);
-        }
-
-         public void update() {
-            ContentResolver resolver = mContext.getContentResolver();
-
             mCandyLogo = Settings.System.getIntForUser(resolver,
                     Settings.System.STATUS_BAR_CANDY_LOGO, 0, mCurrentUserId) == 1;
             showCandyLogo(mCandyLogo);
-
             mShowCarrierLabel = Settings.System.getIntForUser(resolver,
                     Settings.System.STATUS_BAR_SHOW_CARRIER, 1, UserHandle.USER_CURRENT);
-
             int mode = Settings.System.getIntForUser(mContext.getContentResolver(),
                             Settings.System.SCREEN_BRIGHTNESS_MODE,
                             Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
@@ -655,7 +649,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mBrightnessControl = Settings.System.getIntForUser(
                     resolver, Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, 0,
                     UserHandle.USER_CURRENT) == 1;
-         }
+            mQsLayoutColumns = Settings.System.getIntForUser(resolver,
+                    Settings.System.QS_LAYOUT_COLUMNS, 3, mCurrentUserId);
+
+            if (mHeader != null) {
+                mHeader.update();
+            }
+        }
     }
 
     private int mInteractingWindows;

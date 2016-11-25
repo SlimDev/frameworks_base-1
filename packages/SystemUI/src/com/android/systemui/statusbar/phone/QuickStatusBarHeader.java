@@ -499,4 +499,14 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         return Settings.System.getInt(mContext.getContentResolver(),
             Settings.System.QS_DATE_TIME_CENTER, 1) == 1;
     }
+
+   @Override
+   public void update() {
+       if (mQsPanel != null) {
+           mQsPanel.update();
+       }
+       if (mHeaderQsPanel != null) {
+           mHeaderQsPanel.update();
+       }
+   }
 }
