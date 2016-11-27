@@ -4035,6 +4035,12 @@ public final class Settings {
         public static final String STATUS_BAR_CUSTOM_HEADER = "status_bar_custom_header";
 
         /**
+         * Whether to display music track title within the music qs tile
+         * @hide
+         */
+        public static final String MUSIC_TILE_TITLE = "music_tile_title";
+
+        /**
          * Whether to apply a shadow on top of the header image
          * value is the alpha value of the shadow image is 0 -> no shadow -> 255 black
          * @hide
