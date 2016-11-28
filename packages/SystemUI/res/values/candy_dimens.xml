@@ -50,4 +50,7 @@
 
     <!-- Recents task locking button -->
     <dimen name="recents_task_view_header_lock_button_padding">48dp</dimen>
+
+    <!-- Qs visibility -->
+    <dimen name="qs_tile_height_wo_label">48dp</dimen>
 </resources>
