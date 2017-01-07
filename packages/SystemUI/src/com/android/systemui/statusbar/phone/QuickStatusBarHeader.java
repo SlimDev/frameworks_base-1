@@ -36,6 +36,7 @@ import android.util.SparseBooleanArray;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -106,6 +107,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     private float mDateTimeTranslation;
     private SparseBooleanArray mRoamingsBySubId = new SparseBooleanArray();
     private boolean mIsRoaming;
+    private HorizontalScrollView mQuickQsPanelScroller;
 
     private boolean isSettingsIcon;
     private boolean isSettingsExpanded;
@@ -143,6 +145,8 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mExpandIndicator = (ExpandableIndicator) findViewById(R.id.expand_indicator);
 
         mHeaderQsPanel = (QuickQSPanel) findViewById(R.id.quick_qs_panel);
+        mQuickQsPanelScroller = (HorizontalScrollView) findViewById(R.id.quick_qs_panel_scroll);
+        mQuickQsPanelScroller.setHorizontalScrollBarEnabled(false);
 
         mSettingsButton = (SettingsButton) findViewById(R.id.settings_button);
         mSettingsContainer = findViewById(R.id.settings_button_container);
@@ -493,6 +497,17 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     public boolean isMultiUserSwitchEnabled() {
         return Settings.System.getInt(mContext.getContentResolver(),
             Settings.System.QS_MULTIUSER_SWITCH_TOGGLE, 1) == 1;
+            }
+        }
+        if (mHeaderQsPanel != null) {
+            mHeaderQsPanel.updateSettings();
+        }
+    }
+
+    @Override
+    public void onClosingFinished() {
+        mQuickQsPanelScroller.scrollTo(0, 0);
+>>>>>>> cdb7edb... All tile scroller for quickbar settings [1/2]
     }
 
     public boolean isDateTimeGroupCenter() {
