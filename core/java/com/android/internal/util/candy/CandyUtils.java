@@ -16,20 +16,33 @@
 
 package com.android.internal.util.candy;
 
-import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.app.ActivityManager;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
 
 import java.util.List;
 import java.util.Locale;
 
 public class CandyUtils {
+
+    public static boolean isAvailableApp(String packageName, Context context) {
+        Context mContext = context;
+        final PackageManager pm = mContext.getPackageManager();
+        try {
+            pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
+            int enabled = pm.getApplicationEnabledSetting(packageName);
+            return enabled != PackageManager.COMPONENT_ENABLED_STATE_DISABLED &&
+                enabled != PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
+        } catch (NameNotFoundException e) {
+            return false;
+        }
+    }
 
     public static boolean isChineseLanguage() {
        return Resources.getSystem().getConfiguration().locale.getLanguage().startsWith(
