@@ -499,9 +499,9 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     }
 
     @Override
-    public void updateSettings() {
+    public void update() {
         if (mQsPanel != null) {
-            mQsPanel.updateSettings();
+            mQsPanel.update();
 
             // if header is active we want to push the qs panel a little bit further down
             // to have more space for the header image
@@ -512,7 +512,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
             });
         }
         if (mHeaderQsPanel != null) {
-            mHeaderQsPanel.updateSettings();
+            mHeaderQsPanel.update();
         }
         applyHeaderBackgroundShadow();
     }
@@ -622,5 +622,20 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     public boolean isMultiUserSwitchDisabled() {
         return Settings.System.getInt(mContext.getContentResolver(),
             Settings.System.QS_MULTIUSER_SWITCH_TOGGLE, 0) == 1;
+    }
+
+    private void setQsPanelOffset() {
+        final boolean customHeader = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.STATUS_BAR_CUSTOM_HEADER, 0,
+                UserHandle.USER_CURRENT) != 0;
+        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mQsPanel.getLayoutParams();
+        params.setMargins(0, customHeader ? mQsPanelOffsetHeader : mQsPanelOffsetNormal, 0, 0);
+        mQsPanel.setLayoutParams(params);
+    }
+
+    private void setHeaderImageHeight() {
+        LinearLayout.LayoutParams p = (LinearLayout.LayoutParams) mBackgroundImage.getLayoutParams();
+        p.height = getExpandedHeight();
+        mBackgroundImage.setLayoutParams(p);
     }
 }
