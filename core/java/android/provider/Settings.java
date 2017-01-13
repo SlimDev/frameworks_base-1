@@ -4048,10 +4048,16 @@ public final class Settings {
         public static final String STATUS_BAR_DAYLIGHT_HEADER_PACK = "status_bar_daylight_header_pack";
 
         /**
-         * Current active provider
+         * Current active provider - available currently "static" "daylight"
          * @hide
          */
         public static final String STATUS_BAR_CUSTOM_HEADER_PROVIDER = "status_bar_custom_header_provider";
+
+        /**
+        * Manual override picture to use
+        * @hide
+        */
+        public static final String STATUS_BAR_CUSTOM_HEADER_IMAGE = "status_bar_custom_header_image";
 
         /**
          * Whether to allow one finger quick settings expansion on the left or right side of the statusbar.
