@@ -155,6 +155,7 @@ import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
+import com.android.systemui.candy.headers.StatusBarHeaderMachine;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.navigation.NavigationController;
 import com.android.systemui.navigation.Navigator;
@@ -390,6 +391,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     // settings
     private QSPanel mQSPanel;
+
+    // qs headers
+    private StatusBarHeaderMachine mStatusBarHeaderMachine;
 
     // top bar
     BaseStatusBarHeader mHeader;
@@ -1147,6 +1151,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             createUserSwitcher();
         }
 
+        mStatusBarHeaderMachine = new StatusBarHeaderMachine(mContext);
+
         // Set up the quick settings tile panel
         AutoReinflateContainer container = (AutoReinflateContainer) mStatusBarWindow.findViewById(
                 R.id.qs_auto_reinflate_container);
@@ -1169,6 +1175,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     mQSPanel.setBrightnessMirror(mBrightnessMirrorController);
                     mKeyguardStatusBar.setQSPanel(mQSPanel);
                     mHeader = qsContainer.getHeader();
+
+                    // on dpi changes the header is recreated so we need
+                    // to add the new one again as addObserver
+                    // the old one will be removed in the same step
+                    mStatusBarHeaderMachine.addObserver((QuickStatusBarHeader) mHeader);
+                    mStatusBarHeaderMachine.updateEnablement();
+
+                    // Update all other settings
+                    mHeader.update();
+
                     initSignalCluster(mHeader);
                     mHeader.setActivityStarter(PhoneStatusBar.this);
                 }
@@ -4226,6 +4242,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mLockscreenWallpaper.setCurrentUser(newUserId);
         mScrimController.setCurrentUser(newUserId);
         updateMediaMetaData(true, false);
+        mStatusBarHeaderMachine.updateEnablement();
     }
 
     private void setControllerUsers() {
