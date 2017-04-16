@@ -37,4 +37,8 @@
     <!-- Recents Memory bar -->
     <color name="recents_memory_text_color">@android:color/white</color>
 
+    <!-- Expanded Status Bar Weather Text Colors -->
+    <color name="status_bar_temperature_text_color">#FFFFFFFF</color>
+    <color name="status_bar_temperature_location_text_color">#FFFFFFFF</color>
+
 </resources>

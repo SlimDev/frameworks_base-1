@@ -160,8 +160,8 @@ public class QuickQSPanel extends QSPanel {
     }
 
     @Override
-    public void updateSettings() {
-        super.updateSettings();
+    public void update() {
+        super.update();
         mIsScrolling = (Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.QS_QUICKBAR_SCROLL_ENABLED, 0, UserHandle.USER_CURRENT) == 0 ?
                 NUM_QUICK_TILES_DEFAULT : NUM_QUICK_TILES_ALL) == NUM_QUICK_TILES_ALL;
