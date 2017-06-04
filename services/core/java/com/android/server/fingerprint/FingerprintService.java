@@ -119,7 +119,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
             Collections.synchronizedMap(new HashMap<>());
     private final AppOpsManager mAppOps;
     private static final long FAIL_LOCKOUT_TIMEOUT_MS = 30*1000;
-    private static final int MAX_FAILED_ATTEMPTS_LOCKOUT_TIMED = 7;
+    private static final int MAX_FAILED_ATTEMPTS_LOCKOUT_TIMED = 5;
     private static final int MAX_FAILED_ATTEMPTS_LOCKOUT_PERMANENT = 20;
 
     private static final long CANCEL_TIMEOUT_LIMIT = 3000; // max wait for onCancel() from HAL,in ms
@@ -818,10 +818,12 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                 mFailedAttempts++;
                 mTimedLockoutCleared = false;
                 final int lockoutMode = getLockoutMode();
-                if (mPerformanceStats != null && lockoutMode == AuthenticationClient.LOCKOUT_PERMANENT) {
-                    mPerformanceStats.permanentLockout++;
-                } else if (mPerformanceStats != null && lockoutMode == AuthenticationClient.LOCKOUT_TIMED) {
-                    mPerformanceStats.lockout++;
+                if (mPerformanceStats != null) {
+                    if (lockoutMode == AuthenticationClient.LOCKOUT_PERMANENT) {
+                        mPerformanceStats.permanentLockout++;
+                    } else if (lockoutMode == AuthenticationClient.LOCKOUT_TIMED) {
+                        mPerformanceStats.lockout++;
+                    }
                 }
 
                 // Failing multiple times will continue to push out the lockout time
