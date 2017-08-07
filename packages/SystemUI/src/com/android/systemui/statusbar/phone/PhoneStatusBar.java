@@ -580,6 +580,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         void observe() {
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.QS_QUICKBAR_SCROLL_ENABLED),
+                    false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_CANDY_LOGO),
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
@@ -5112,6 +5115,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public void onClosingFinished() {
         runPostCollapseRunnables();
+        mHeader.onClosingFinished();
     }
 
     public void onUnlockHintStarted() {
