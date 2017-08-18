@@ -4216,6 +4216,12 @@ public final class Settings {
          */
         public static final String POWER_REBOOT_DIALOG_DIM = "power_reboot_dialog_dim";
 
+         /**
+         * Quick Settings number of columns
+         * @hide
+         */
+        public static final String QS_LAYOUT_COLUMNS = "qs_layout_columns";
+
         /**
          * Number of rows used for the Quick Settings (portrait)
          *
