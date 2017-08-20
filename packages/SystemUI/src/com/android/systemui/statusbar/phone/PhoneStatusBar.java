@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-
 import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
@@ -590,30 +589,33 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
            resolver.registerContentObserver(Settings.System.getUriFor(
                   Settings.System.QS_ROWS_LANDSCAPE),
                   false, this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_CANDY_LOGO),
-                    false, this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_SHOW_CARRIER),
-                    false, this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL),
-                    false, this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.SCREEN_BRIGHTNESS_MODE),
-                    false, this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.NAV_BAR_DYNAMIC),
-                    false, this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.NAVBAR_TINT_SWITCH),
-                    false, this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.NAVBAR_BUTTON_COLOR),
-                    false, this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_SHOW_TICKER),
-                    false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.STATUS_BAR_CANDY_LOGO),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.STATUS_BAR_SHOW_CARRIER),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.Secure.getUriFor(
+                  Settings.Secure.LOCK_QS_DISABLED),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.SCREEN_BRIGHTNESS_MODE),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.NAV_BAR_DYNAMIC),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.NAVBAR_TINT_SWITCH),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.NAVBAR_BUTTON_COLOR),
+                  false, this, UserHandle.USER_ALL);
+           resolver.registerContentObserver(Settings.System.getUriFor(
+                  Settings.System.STATUS_BAR_SHOW_TICKER),
+                  false, this, UserHandle.USER_ALL);
            resolver.registerContentObserver(Settings.System.getUriFor(
                   Settings.System.QS_QUICKBAR_SCROLL_ENABLED),
                   false, this, UserHandle.USER_ALL);
@@ -629,8 +631,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             super.onChange(selfChange, uri);
-            update();
-
             if (uri.equals(Settings.System.getUriFor(
                     Settings.System.QS_ROWS_PORTRAIT))
                     || uri.equals(Settings.System.getUriFor(
@@ -638,7 +638,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     updateResources();
             } else if (uri.equals(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_SHOW_CARRIER))) {
-                update();
+                updateSettings();
                 updateCarrier();
             } else if (uri.equals(Settings.System.getUriFor(
                     Settings.System.NAV_BAR_DYNAMIC))) {
@@ -649,32 +649,18 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             } else if (uri.equals(Settings.System.getUriFor(
                     Settings.System.NAVBAR_BUTTON_COLOR))) {
                     mNavigationController.updateNavbarOverlay(mContext.getResources());
-           } else if (uri.equals(Settings.System.getUriFor(
+            } else if (uri.equals(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_SHOW_TICKER))) {
-                mTickerEnabled = Settings.System.getIntForUser(
+                    mTickerEnabled = Settings.System.getIntForUser(
                         mContext.getContentResolver(),
                         Settings.System.STATUS_BAR_SHOW_TICKER,
                         0, UserHandle.USER_CURRENT) == 1;
                 initTickerView(); 
-           }
-
+            }
             updateSettings();
         }
 
-
-        void unobserve() {
-            ContentResolver resolver = mContext.getContentResolver();
-            resolver.unregisterContentObserver(this);
-        }
-
-        public void updateQS() {
-            updateResources();
-            if (mHeader != null) {
-                mHeader.updateSettings();
-            }
-        }
-
-         public void update() {
+        public void updateSettings() {
             ContentResolver resolver = mContext.getContentResolver();
 
             mCandyLogo = Settings.System.getIntForUser(resolver,
@@ -1199,6 +1185,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     mQSPanel.setBrightnessMirror(mBrightnessMirrorController);
                     mKeyguardStatusBar.setQSPanel(mQSPanel);
                     mHeader = qsContainer.getHeader();
+
+                    // on dpi changes the header is recreated so we need
+                    // to add the new one again as addObserver
+                    // the old one will be removed in the same step
+                    mStatusBarHeaderMachine.addObserver((QuickStatusBarHeader) mHeader);
+                    mStatusBarHeaderMachine.updateEnablement();
+
+                    // Update all other settings
+                    mHeader.updateSettings();
+
                     initSignalCluster(mHeader);
                     mHeader.setActivityStarter(PhoneStatusBar.this);
                 }
