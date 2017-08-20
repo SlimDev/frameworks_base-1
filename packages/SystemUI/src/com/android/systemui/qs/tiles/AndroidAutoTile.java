@@ -37,7 +37,7 @@ public class AndroidAutoTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     public int getMetricsCategory() {
-        return MetricsEvent.QUICK_SETTINGS;
+        return MetricsEvent.CANDYCANE;
     }
 
     private void callApp() {

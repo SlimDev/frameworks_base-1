@@ -595,9 +595,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
            resolver.registerContentObserver(Settings.System.getUriFor(
                   Settings.System.STATUS_BAR_SHOW_CARRIER),
                   false, this, UserHandle.USER_ALL);
-           resolver.registerContentObserver(Settings.Secure.getUriFor(
-                  Settings.Secure.LOCK_QS_DISABLED),
-                  false, this, UserHandle.USER_ALL);
            resolver.registerContentObserver(Settings.System.getUriFor(
                   Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL),
                   false, this, UserHandle.USER_ALL);
