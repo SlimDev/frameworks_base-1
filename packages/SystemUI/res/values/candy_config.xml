@@ -15,9 +15,6 @@
 -->
 <resources>
 
-    <integer name="config_qs_num_rows_landscape_default">1</integer>
-    <integer name="config_qs_num_columns_landscape_default">4</integer>
-    
     <!-- On-The-Go -->
    <integer name="quick_settings_onthego_dialog_short_timeout">3000</integer>
    <integer name="quick_settings_onthego_dialog_long_timeout">6000</integer>
