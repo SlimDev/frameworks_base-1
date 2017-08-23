@@ -4217,35 +4217,12 @@ public final class Settings {
         public static final String POWER_REBOOT_DIALOG_DIM = "power_reboot_dialog_dim";
 
         /**
-         * Number of rows used for the Quick Settings (portrait)
+         * Settings to backup. This is here so that it's in the same place as the settings
+         * keys and easy to update.
          *
-         * @hide
-         */
-        public static final String QS_ROWS_PORTRAIT = "qs_rows_portrait";
-
-        /**
-         * Number of columns used for the Quick Settings (portrait)
-         *
-         * @hide
-         */
-        public static final String QS_COLUMNS_PORTRAIT = "qs_columns_portrait";
-
-        /**
-         * Number of rows used for the Quick Settings (landscape)
-         *
-         * @hide
-         */
-        public static final String QS_ROWS_LANDSCAPE = "qs_rows_landscape";
-
-        /**
-         * Number of columns used for the Quick Settings (landscape)
-         *
-         * @hide
-         */
-        public static final String QS_COLUMNS_LANDSCAPE = "qs_columns_landscape";
-
-        /**
-         * Boolean value whether to link ringtone and notification volume
+         * NOTE: Settings are backed up and restored in the order they appear
+         *       in this array. If you have one setting depending on another,
+         *       make sure that they are ordered appropriately.
          *
          * @hide
          */
