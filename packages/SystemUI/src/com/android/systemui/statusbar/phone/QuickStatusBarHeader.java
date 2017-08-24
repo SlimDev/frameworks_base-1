@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2015 The Android Open Source Project
  *
@@ -72,7 +71,7 @@ import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChange
 
 public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         NextAlarmChangeCallback, OnClickListener, OnUserInfoChangedListener, EmergencyListener,
-        OnLongClickListener, SignalCallback, StatusBarHeaderMachine.IStatusBarHeaderMachineObserver {
+        SignalCallback, StatusBarHeaderMachine.IStatusBarHeaderMachineObserver {
 
     private static final String TAG = "QuickStatusBarHeader";
 
@@ -375,6 +374,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
             mHost.getNetworkController().removeSignalCallback(this);
         }
     }
+
     @Override
     public void setActivityStarter(ActivityStarter activityStarter) {
         mActivityStarter = activityStarter;
@@ -595,11 +595,6 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         LinearLayout.LayoutParams p = (LinearLayout.LayoutParams) mBackgroundImage.getLayoutParams();
         p.height = getExpandedHeight();
         mBackgroundImage.setLayoutParams(p);
-    }
-
-    @Override
-    public void onUserInfoChanged(String name, Drawable picture) {
-        mMultiUserAvatar.setImageDrawable(picture);
     }
 
     public boolean isSettingsIconEnabled() {

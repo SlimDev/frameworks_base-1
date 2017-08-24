@@ -389,8 +389,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     View mExpandedContents;
     TextView mNotificationPanelDebugText;
 
-    private int mQsLayoutColumns;
-
     // settings
     private QSPanel mQSPanel;
 
@@ -484,15 +482,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private NavigationController mNavigationController;
     private DUPackageMonitor mPackageMonitor;
 
-    Runnable mLongPressBrightnessChange = new Runnable() {
-        @Override
-        public void run() {
-            mStatusBarView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-            adjustBrightness(mInitialTouchX);
-            mLinger = BRIGHTNESS_CONTROL_LINGER_THRESHOLD + 1;
-        }
-    };
-
     private View.OnTouchListener mUserAutoHideListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
@@ -540,14 +529,29 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         void observe() {
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL), false, this,
-                    UserHandle.USER_ALL);
+                    Settings.System.STATUS_BAR_CANDY_LOGO),
+                    false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.SCREEN_BRIGHTNESS_MODE), false, this,
-                    UserHandle.USER_ALL);
+                    Settings.System.STATUS_BAR_SHOW_CARRIER),
+                    false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_SHOW_CARRIER), false, this,
-                    UserHandle.USER_ALL);
+                    Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL),
+                    false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SCREEN_BRIGHTNESS_MODE),
+                    false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.NAV_BAR_DYNAMIC),
+                    false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.NAVBAR_TINT_SWITCH),
+                    false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.NAVBAR_BUTTON_COLOR),
+                    false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_SHOW_TICKER),
+                    false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.QS_LAYOUT_COLUMNS), false, this,
                     UserHandle.USER_ALL);
@@ -564,12 +568,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
            resolver.registerContentObserver(Settings.System.getUriFor(
                   Settings.System.STATUS_BAR_CUSTOM_HEADER),
                   false, this, UserHandle.USER_ALL);
-           update();
+            update();
         }
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             super.onChange(selfChange, uri);
+            update();
+
             if (uri.equals(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_SHOW_CARRIER))) {
                 update();
@@ -579,12 +585,33 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     || uri.equals(Settings.System.getUriFor(
                     Settings.System.QS_ROWS_LANDSCAPE))) {
                     updateResources();
+            } else if (uri.equals(Settings.System.getUriFor(
+                    Settings.System.NAV_BAR_DYNAMIC))) {
+                    mNavigationController.updateNavbarOverlay(mContext.getResources());
+            } else if (uri.equals(Settings.System.getUriFor(
+                    Settings.System.NAVBAR_TINT_SWITCH))) {
+                    mNavigationController.updateNavbarOverlay(mContext.getResources());
+            } else if (uri.equals(Settings.System.getUriFor(
+                    Settings.System.NAVBAR_BUTTON_COLOR))) {
+                    mNavigationController.updateNavbarOverlay(mContext.getResources());
+           } else if (uri.equals(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_SHOW_TICKER))) {
+                mTickerEnabled = Settings.System.getIntForUser(
+                        mContext.getContentResolver(),
+                        Settings.System.STATUS_BAR_SHOW_TICKER,
+                        0, UserHandle.USER_CURRENT) == 1;
+                initTickerView(); 
             }
             update();
         }
 
         public void update() {
             ContentResolver resolver = mContext.getContentResolver();
+            mCandyLogo = Settings.System.getIntForUser(resolver,
+                    Settings.System.STATUS_BAR_CANDY_LOGO, 0, mCurrentUserId) == 1;
+            showCandyLogo(mCandyLogo);
+            mShowCarrierLabel = Settings.System.getIntForUser(resolver,
+                    Settings.System.STATUS_BAR_SHOW_CARRIER, 1, UserHandle.USER_CURRENT);
             int mode = Settings.System.getIntForUser(mContext.getContentResolver(),
                             Settings.System.SCREEN_BRIGHTNESS_MODE,
                             Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
@@ -593,13 +620,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mBrightnessControl = Settings.System.getIntForUser(
                     resolver, Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, 0,
                     UserHandle.USER_CURRENT) == 1;
-            mShowCarrierLabel = Settings.System.getIntForUser(resolver,
-                    Settings.System.STATUS_BAR_SHOW_CARRIER, 1, UserHandle.USER_CURRENT);
             mQsLayoutColumns = Settings.System.getIntForUser(resolver,
                     Settings.System.QS_LAYOUT_COLUMNS, 3, mCurrentUserId);
 
             if (mHeader != null) {
-                mHeader.updateSettings();
+                mHeader.update();
             }
         }
     }
@@ -654,97 +679,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
         }
     };
-
-    class SettingsObserver extends ContentObserver {
-        SettingsObserver(Handler handler) {
-            super(handler);
-        }
-
-        void observe() {
-            ContentResolver resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_CANDY_LOGO),
-                    false, this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_SHOW_CARRIER),
-                    false, this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL),
-                    false, this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.SCREEN_BRIGHTNESS_MODE),
-                    false, this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.NAV_BAR_DYNAMIC),
-                    false, this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.NAVBAR_TINT_SWITCH),
-                    false, this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.NAVBAR_BUTTON_COLOR),
-                    false, this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_SHOW_TICKER),
-                    false, this, UserHandle.USER_ALL);
-            update();
-        }
-
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            super.onChange(selfChange, uri);
-            update();
-
-            if (uri.equals(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_SHOW_CARRIER))) {
-                update();
-                updateCarrier();
-            } else if (uri.equals(Settings.System.getUriFor(
-                    Settings.System.NAV_BAR_DYNAMIC))) {
-                    mNavigationController.updateNavbarOverlay(mContext.getResources());
-            } else if (uri.equals(Settings.System.getUriFor(
-                    Settings.System.NAVBAR_TINT_SWITCH))) {
-                    mNavigationController.updateNavbarOverlay(mContext.getResources());
-            } else if (uri.equals(Settings.System.getUriFor(
-                    Settings.System.NAVBAR_BUTTON_COLOR))) {
-                    mNavigationController.updateNavbarOverlay(mContext.getResources());
-           } else if (uri.equals(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_SHOW_TICKER))) {
-                mTickerEnabled = Settings.System.getIntForUser(
-                        mContext.getContentResolver(),
-                        Settings.System.STATUS_BAR_SHOW_TICKER,
-                        0, UserHandle.USER_CURRENT) == 1;
-                initTickerView(); 
-           }
-
-           update();
-        }
-
-
-        void unobserve() {
-            ContentResolver resolver = mContext.getContentResolver();
-            resolver.unregisterContentObserver(this);
-        }
-
-         public void update() {
-            ContentResolver resolver = mContext.getContentResolver();
-
-            mCandyLogo = Settings.System.getIntForUser(resolver,
-                    Settings.System.STATUS_BAR_CANDY_LOGO, 0, mCurrentUserId) == 1;
-            showCandyLogo(mCandyLogo);
-
-            mShowCarrierLabel = Settings.System.getIntForUser(resolver,
-                    Settings.System.STATUS_BAR_SHOW_CARRIER, 1, UserHandle.USER_CURRENT);
-
-            int mode = Settings.System.getIntForUser(mContext.getContentResolver(),
-                            Settings.System.SCREEN_BRIGHTNESS_MODE,
-                            Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL,
-                            UserHandle.USER_CURRENT);
-            mAutomaticBrightness = mode != Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL;
-            mBrightnessControl = Settings.System.getIntForUser(
-                    resolver, Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, 0,
-                    UserHandle.USER_CURRENT) == 1;
-         }
-    }
 
     private int mInteractingWindows;
     private boolean mAutohideSuspended;
@@ -1155,7 +1089,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         createIconController();
 
-
         // Background thread for any controllers that need it.
         mHandlerThread = new HandlerThread(TAG, Process.THREAD_PRIORITY_BACKGROUND);
         mHandlerThread.start();
@@ -1247,6 +1180,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     // the old one will be removed in the same step
                     mStatusBarHeaderMachine.addObserver((QuickStatusBarHeader) mHeader);
                     mStatusBarHeaderMachine.updateEnablement();
+
+                    // Update all other settings
+                    mHeader.update();
 
                     initSignalCluster(mHeader);
                     mHeader.setActivityStarter(PhoneStatusBar.this);
@@ -3138,7 +3074,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 MetricsLogger.count(mContext, NotificationPanelView.COUNTER_PANEL_OPEN_QS, 1);
             }
         }
-
     }
 
     boolean panelsEnabled() {
