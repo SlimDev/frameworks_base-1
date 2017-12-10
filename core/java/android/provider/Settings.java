@@ -4052,6 +4052,12 @@ public final class Settings {
         public static final String AMBIENT_DOZE_AUTO_BRIGHTNESS = "ambient_doze_auto_brightness";
 
         /**
+         * Use latest screen-on brightness value for Ambient Display
+         * @hide
+         */
+        public static final String LAST_DOZE_AUTO_BRIGHTNESS = "last_doze_auto_brightness";
+
+        /**
          * Whether to launch default music player when headset plugged in
          * 0 = don't do anything (default)
          * 1 = launch only on wired connection
@@ -4521,18 +4527,6 @@ public final class Settings {
          * @hide
          */
         public static final String SHOW_CLEAR_ALL_RECENTS = "show_clear_all_recents";
-
-        /**
-         * Use latest screen-on brightness value for Ambient Display
-         * @hide
-         */
-        public static final String AMBIENT_DOZE_AUTO_BRIGHTNESS = "ambient_doze_auto_brightness";
-
-        /**
-         * Use latest screen-on brightness value for Ambient Display
-         * @hide
-         */
-        public static final String LAST_DOZE_AUTO_BRIGHTNESS = "last_doze_auto_brightness";
 
         /**
          * location of the clear all rectents button

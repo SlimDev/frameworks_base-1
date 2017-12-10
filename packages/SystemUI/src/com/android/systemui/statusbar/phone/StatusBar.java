@@ -6469,7 +6469,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             updateClockPosition();
             updateBatterySettings();
             setFpToDismissNotifications();
-
+            updateDozeBrightness();
         }
     }
 
