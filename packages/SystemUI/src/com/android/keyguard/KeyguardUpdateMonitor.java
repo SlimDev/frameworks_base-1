@@ -90,6 +90,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+import candy.provider.CandySettings;
+import static candy.provider.CandySettings.FINGERPRINT_UNLOCK_AFTER_REBOOT;
+
 /**
  * Watches for updates that may be interesting to the keyguard, and provides
  * the up to date information as well as a registration for callbacks that care
@@ -679,7 +682,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     public boolean isUnlockingWithFingerprintAllowed() {
-        return mStrongAuthTracker.isUnlockingWithFingerprintAllowed();
+        boolean fingerprint_unlock_after_reboot =
+            NexusSettings.getBoolForCurrentUser(mContext, FINGERPRINT_UNLOCK_AFTER_REBOOT, false);
+
+        return mStrongAuthTracker.isUnlockingWithFingerprintAllowed()
+            || fingerprint_unlock_after_reboot;
     }
 
     public boolean needsSlowUnlockTransition() {

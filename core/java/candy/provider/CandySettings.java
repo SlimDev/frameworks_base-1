@@ -35,6 +35,12 @@ public final class CandySettings {
     public static final String CANDY_SETTINGS_PREFIX = "candy::";
 
     /**
+     * Whether user can unlock the device with the fingerprint
+     * @hide
+     */
+    public static final String FINGERPRINT_UNLOCK_AFTER_REBOOT = "fingerprint_unlock_after_reboot";
+
+    /**
      * Wrapper for getIntForCurrentUser(). Returns true if the stored integerfor
      * the current user is not 0, returning a default value if no stored value
      * was found
