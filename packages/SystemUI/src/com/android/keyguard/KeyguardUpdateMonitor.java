@@ -683,7 +683,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     public boolean isUnlockingWithFingerprintAllowed() {
         boolean fingerprint_unlock_after_reboot =
-            NexusSettings.getBoolForCurrentUser(mContext, FINGERPRINT_UNLOCK_AFTER_REBOOT, false);
+            CandySettings.getBoolForCurrentUser(mContext, FINGERPRINT_UNLOCK_AFTER_REBOOT, false);
 
         return mStrongAuthTracker.isUnlockingWithFingerprintAllowed()
             || fingerprint_unlock_after_reboot;

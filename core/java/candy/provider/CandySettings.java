@@ -41,6 +41,13 @@ public final class CandySettings {
     public static final String FINGERPRINT_UNLOCK_AFTER_REBOOT = "fingerprint_unlock_after_reboot";
 
     /**
+     * Whether the lockscreen and/or doze-clock shows seconds
+     * Takes 0 (Off), 1 (Lockscreen), 2 (Doze) and 3 (Lockscreen and doze) as values
+     * @hide
+     */
+    public static final String KEYGUARD_CLOCK_SHOW_SECONDS = "keyguard_clock_show_seconds";
+
+    /**
      * Wrapper for getIntForCurrentUser(). Returns true if the stored integerfor
      * the current user is not 0, returning a default value if no stored value
      * was found
