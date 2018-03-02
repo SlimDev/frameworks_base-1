@@ -1166,6 +1166,9 @@ public final class PowerManagerService extends SystemService
 
     private void acquireWakeLockInternal(IBinder lock, int flags, String tag, String packageName,
             WorkSource ws, String historyTag, int uid, int pid) {
+        // @ WAKEBLOCK
+        com.candyrom.wakeblock.WakeBlockService.getInstance().bindService(mContext);
+        // # WAKEBLOCK
         synchronized (mLock) {
             if (DEBUG_SPEW) {
                 Slog.d(TAG, "acquireWakeLockInternal: lock=" + Objects.hashCode(lock)
@@ -1183,9 +1186,17 @@ public final class PowerManagerService extends SystemService
                     notifyWakeLockChangingLocked(wakeLock, flags, tag, packageName,
                             uid, pid, ws, historyTag);
                     wakeLock.updateProperties(flags, tag, packageName, ws, historyTag, uid, pid);
+                    // @ WAKEBLOCK
+                    com.candyrom.wakeblock.WakeBlockService.getInstance().wakeLockUpdateProperties(lock, wakeLock.mTag, tag);
+                    // # WAKEBLOCK
                 }
                 notifyAcquire = false;
             } else {
+                // @ WAKEBLOCK
+                if (!com.candyrom.wakeblock.WakeBlockService.getInstance().wakeLockAcquireNew(lock, tag, packageName)) {
+                    return;
+                }
+                // # WAKEBLOCK
                 UidState state = mUidState.get(uid);
                 if (state == null) {
                     state = new UidState(uid);
@@ -1261,6 +1272,9 @@ public final class PowerManagerService extends SystemService
             }
 
             WakeLock wakeLock = mWakeLocks.get(index);
+            // @ WAKEBLOCK
+            com.candyrom.wakeblock.WakeBlockService.getInstance().wakeLockRelease(lock, wakeLock.mTag);
+            // # WAKEBLOCK
             if (DEBUG_SPEW) {
                 Slog.d(TAG, "releaseWakeLockInternal: lock=" + Objects.hashCode(lock)
                         + " [" + wakeLock.mTag + "], flags=0x" + Integer.toHexString(flags));
@@ -1287,6 +1301,9 @@ public final class PowerManagerService extends SystemService
                 return;
             }
 
+            // @ WAKEBLOCK
+            com.candyrom.wakeblock.WakeBlockService.getInstance().wakeLockHandleDeath(wakeLock.mLock, wakeLock.mTag);
+            // # WAKEBLOCK
             removeWakeLockLocked(wakeLock, index);
         }
     }
