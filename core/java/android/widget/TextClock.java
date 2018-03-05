@@ -35,8 +35,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.service.dreams.DreamService;
-import android.service.dreams.IDreamManager;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.view.RemotableViewMethod;
@@ -147,8 +145,7 @@ public class TextClock extends TextView {
 
     private boolean mShowCurrentUserTime;
     private boolean mIsKeyguardClockView;
-
-    private IDreamManager mDreamManager = null;
+    private boolean mIsDark;
 
     private ContentObserver mFormatChangeObserver;
     private class FormatChangeObserver extends ContentObserver {
@@ -245,9 +242,6 @@ public class TextClock extends TextView {
         } finally {
             a.recycle();
         }
-
-        mDreamManager = IDreamManager.Stub.asInterface(
-                ServiceManager.getService(DreamService.DREAM_SERVICE));
 
         init();
     }
@@ -499,6 +493,16 @@ public class TextClock extends TextView {
     }
 
     /**
+     * Determines if the parent is in a dark-mode, which in case of
+     * KeyguardStatusView means that it is going to doze/dream-state
+     *
+     * @hide
+     */
+    public void setIsDark(boolean isDark) {
+        mIsDark = isDark;
+    }
+
+    /**
      * Selects either one of {@link #getFormat12Hour()} or {@link #getFormat24Hour()}
      * depending on whether the user has selected 24-hour format.
      */
@@ -517,17 +521,11 @@ public class TextClock extends TextView {
 
         if (mIsKeyguardClockView) {
             int showSecondsType = CandySettings.getIntForCurrentUser(getContext(), KEYGUARD_CLOCK_SHOW_SECONDS, 0);
-            boolean isDozing = false;
-            try {
-                isDozing = (mDreamManager != null && mDreamManager.isDreaming());
-            } catch (RemoteException ex) {
-                ex.printStackTrace();
-            }
 
             if (showSecondsType != 0) {
                 if (showSecondsType == 3
-                        || (showSecondsType == 1 && !isDozing)
-                        || (showSecondsType == 2 && isDozing)) {
+                        || (showSecondsType == 1 && !mIsDark)
+                        || (showSecondsType == 2 && mIsDark)) {
                     mFormat = new String(mFormat + ":ss");
                 }
             }
