@@ -432,4 +432,12 @@
         <item>60</item>
         <item>120</item>
     </integer-array>
+
+    <!-- If true, fp-sensor will start to listening for fingerprints even when the device
+         is being sent to sleep -->
+    <bool name="config_fingerprintListenOnSleep">false</bool>
+
+    <!-- If true, fp-sensor will start to listening for fingerprints even when the device
+         is starting to dream/doze -->
+    <bool name="config_fingerprintListenWhenDreaming">false</bool>
 </resources>

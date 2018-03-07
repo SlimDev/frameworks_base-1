@@ -77,6 +77,7 @@ import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.keyguard.R;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
 
@@ -239,6 +240,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private int mHardwareUnavailableRetryCount = 0;
     private static final int HW_UNAVAILABLE_TIMEOUT = 3000; // ms
     private static final int HW_UNAVAILABLE_RETRY_MAX = 3;
+
+    // FP behaviour configuration
+    private boolean mFingerprintListenOnSleep;
+    private boolean mFingerprintListenWhenDreaming;
 
     private final Handler mHandler = new Handler() {
         @Override
@@ -1209,6 +1214,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
         SystemServicesProxy.getInstance(mContext).registerTaskStackListener(mTaskStackListener);
         mUserManager = context.getSystemService(UserManager.class);
+
+        mFingerprintListenOnSleep = mContext.getResources().getBoolean(
+                    R.bool.config_fingerprintListenOnSleep);
+        mFingerprintListenWhenDreaming = mContext.getResources().getBoolean(
+                    R.bool.config_fingerprintListenWhenDreaming);
     }
 
     private void updateFingerprintListeningState() {
@@ -1234,11 +1244,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private boolean shouldListenForFingerprint() {
-        return (mKeyguardIsVisible || !mDeviceInteractive ||
-                (mBouncer && !mKeyguardGoingAway) || mGoingToSleep ||
-                shouldListenForFingerprintAssistant() || (mKeyguardOccluded && mIsDreaming))
-                && !mSwitchingUser && !isFingerprintDisabled(getCurrentUser())
-                && !mKeyguardGoingAway;
+        if (!mSwitchingUser && !mKeyguardGoingAway && !isFingerprintDisabled(getCurrentUser())) {
+            if (mFingerprintListenOnSleep || (mIsDreaming && mFingerprintListenWhenDreaming)) {
+                return mKeyguardIsVisible || !mDeviceInteractive || mBouncer || mGoingToSleep;
+            } else {
+                return !mGoingToSleep && mDeviceInteractive && (mKeyguardIsVisible || mBouncer);
+            }
+        }
+        return false;
     }
 
     private void startListeningForFingerprint() {
