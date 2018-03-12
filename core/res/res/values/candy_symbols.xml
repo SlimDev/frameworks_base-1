@@ -41,9 +41,6 @@
   <!-- Whether to enable doze always on -->
   <java-symbol type="bool" name="config_enableDozeAlwaysOn" />
 
-  <!-- Vendor mismatched fingerprint warning -->
-  <java-symbol type="string" name="system_error_vendorprint" />
-
   <!-- Pocket Lock -->
   <java-symbol type="layout" name="pocket_lock_view_layout" />
   <java-symbol type="id" name="pocket_hint_container" />
